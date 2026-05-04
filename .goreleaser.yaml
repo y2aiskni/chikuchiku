@@ -8,7 +8,7 @@ before:
 
 builds:
   - id: chikuchiku
-    main: ./cmd/chikuchiku/main.go
+    main: ./cmd/chikuchiku/
     binary: chikuchiku
     env:
       - CGO_ENABLED=0
