@@ -10,7 +10,7 @@ import (
 )
 
 type Chikuchiku interface {
-	PostTodayToDiscord(postURL string) error
+	PostToDiscord(date time.Time, postURL string) error
 }
 
 type chikuchiku struct {
@@ -23,11 +23,9 @@ func NewChikuchiku(db *gorm.DB) Chikuchiku {
 	}
 }
 
-func (c *chikuchiku) PostTodayToDiscord(postURL string) error {
-	now := time.Now()
-
+func (c *chikuchiku) PostToDiscord(date time.Time, postURL string) error {
 	var chiku entity.Chikuchiku
-	if err := c.db.Where("date = ?", now.Format("2006-01-02")).First(&chiku).Error; err != nil {
+	if err := c.db.Where("date = ?", date.Format("2006-01-02")).First(&chiku).Error; err != nil {
 		return fmt.Errorf("failed to c.db.First(): %w", err)
 	}
 
