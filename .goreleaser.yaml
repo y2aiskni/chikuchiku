@@ -25,10 +25,7 @@ builds:
 archives:
   - formats:
       - tar.gz
-    name_template: >-
-      {{ .Binary }}_
-      {{- .Os }}_
-      {{- .Arch }}
+    name_template: "{{ .Binary }}_{{ .Os }}_{{ .Arch }}"
 
 changelog:
   use: github
