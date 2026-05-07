@@ -3,6 +3,7 @@ package main
 import (
 	"fmt"
 	"os"
+	"time"
 
 	"github.com/alecthomas/kong"
 	"github.com/y2aiskni/chikuchiku/internal/usecase"
@@ -16,7 +17,7 @@ func main() {
 	ctx := kong.Parse(&cmd)
 	switch command := ctx.Command(); command {
 	case "post discord":
-		if err := runPostDiscord(cmd.Post.Config); err != nil {
+		if err := runPostDiscord(cmd.Post.Date, cmd.Post.Config); err != nil {
 			fmt.Fprintf(os.Stderr, "error: %v\n", err)
 			os.Exit(1)
 		}
@@ -25,10 +26,18 @@ func main() {
 	}
 }
 
-func runPostDiscord(configFilePath string) error {
+func runPostDiscord(date string, configFilePath string) error {
 	conf, err := util.ReadYamlFile[config](configFilePath)
 	if err != nil {
 		return fmt.Errorf("failed to util.ReadYamlFile(): %w", err)
+	}
+
+	d := time.Now()
+	if date != "" {
+		d, err = time.Parse("2006-01-02", date)
+		if err != nil {
+			return fmt.Errorf("failed to time.Parse(): %w", err)
+		}
 	}
 
 	db, err := openDB(conf.Mysql.Address, conf.Mysql.Port, conf.Mysql.Username, conf.Mysql.Password, conf.Mysql.Database)
@@ -37,8 +46,8 @@ func runPostDiscord(configFilePath string) error {
 	}
 
 	chikuchiku := usecase.NewChikuchiku(db)
-	if err := chikuchiku.PostTodayToDiscord(conf.Discord.PostURL); err != nil {
-		return fmt.Errorf("failed to PostTodayToDiscord(): %w", err)
+	if err := chikuchiku.PostToDiscord(d, conf.Discord.PostURL); err != nil {
+		return fmt.Errorf("failed to PostToDiscord(): %w", err)
 	}
 
 	return nil
