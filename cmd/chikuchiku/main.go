@@ -2,7 +2,9 @@ package main
 
 import (
 	"fmt"
+	"os"
 
+	"github.com/alecthomas/kong"
 	"github.com/y2aiskni/chikuchiku/internal/usecase"
 	"github.com/y2aiskni/chikuchiku/internal/util"
 	"gorm.io/driver/mysql"
@@ -10,20 +12,36 @@ import (
 )
 
 func main() {
+	var cmd Cmd
+	ctx := kong.Parse(&cmd)
+	switch command := ctx.Command(); command {
+	case "post discord":
+		if err := runPostDiscord(); err != nil {
+			fmt.Fprintf(os.Stderr, "error: %v\n", err)
+			os.Exit(1)
+		}
+	default:
+		panic("command not implemented: " + command)
+	}
+}
+
+func runPostDiscord() error {
 	conf, err := util.ReadYamlFile[config]("./config.yaml")
 	if err != nil {
-		panic(err)
+		return fmt.Errorf("failed to util.ReadYamlFile(): %w", err)
 	}
 
 	db, err := openDB(conf.Mysql.Address, conf.Mysql.Port, conf.Mysql.Username, conf.Mysql.Password, conf.Mysql.Database)
 	if err != nil {
-		panic(err)
+		return fmt.Errorf("failed to openDB(): %w", err)
 	}
 
 	chikuchiku := usecase.NewChikuchiku(db)
 	if err := chikuchiku.PostTodayToDiscord(conf.Discord.PostURL); err != nil {
-		panic(err)
+		return fmt.Errorf("failed to PostTodayToDiscord(): %w", err)
 	}
+
+	return nil
 }
 
 func openDB(address string, port uint, username string, password string, database string) (*gorm.DB, error) {

@@ -3,6 +3,7 @@ module github.com/y2aiskni/chikuchiku
 go 1.26.1
 
 require (
+	github.com/alecthomas/kong v1.15.0
 	go.yaml.in/yaml/v3 v3.0.4
 	gorm.io/driver/mysql v1.6.0
 	gorm.io/gorm v1.31.1
