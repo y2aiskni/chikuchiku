@@ -16,7 +16,7 @@ func main() {
 	ctx := kong.Parse(&cmd)
 	switch command := ctx.Command(); command {
 	case "post discord":
-		if err := runPostDiscord(); err != nil {
+		if err := runPostDiscord(cmd.Post.Config); err != nil {
 			fmt.Fprintf(os.Stderr, "error: %v\n", err)
 			os.Exit(1)
 		}
@@ -25,8 +25,8 @@ func main() {
 	}
 }
 
-func runPostDiscord() error {
-	conf, err := util.ReadYamlFile[config]("./config.yaml")
+func runPostDiscord(configFilePath string) error {
+	conf, err := util.ReadYamlFile[config](configFilePath)
 	if err != nil {
 		return fmt.Errorf("failed to util.ReadYamlFile(): %w", err)
 	}
